@@ -1,8 +1,15 @@
-# Traffic Safety Data
-David Hood  
-11/21/2017  
+---
+title: "Traffic Safety Data"
+author: "David Hood"
+date: "11/21/2017"
+output: 
+  word_document: 
+    keep_md: yes
+---
 
-
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
 ## Traffic Data
 
@@ -14,8 +21,7 @@ For the benefit of non-R users, I am making a .csv copy of the obtained data in 
 
 OECD data is obtained using the OECD package in R, and by doing a get_datasets() command, you can then look through for the IDs or relevvant data sets
 
-
-```r
+```{r}
 dataFolder= "traffic_data"
 library(OECD)
 dataset_list <- get_datasets()
@@ -28,8 +34,7 @@ csv obtained 2017-11-20
 
 The OECD ITF_ROAD_ACCIDENTS dataset is road accident information supplied by the ITF
 
-
-```r
+```{r}
 dataset <- "ITF_ROAD_ACCIDENTS"
 csvfile <- paste0(dataFolder,"/OECD_",dataset, ".csv")
 if(!file.exists(csvfile)){
@@ -50,8 +55,7 @@ csv obtained 2017-11-20
 
 The OECD ITF_PASSENGER_TRANSPORT dataset is passenger transport supplied by the ITF
 
-
-```r
+```{r}
 dataset <- "ITF_PASSENGER_TRANSPORT"
 csvfile <- paste0(dataFolder,"/OECD_",dataset, ".csv")
 if(!file.exists(csvfile)){
@@ -72,8 +76,7 @@ csv obtained 2017-11-20
 
 The OECD ITF_INV-MTN_DATA dataset is transport infrastructure investment and maintenance spending supplied by the ITF
 
-
-```r
+```{r}
 dataset <- "ITF_INV-MTN_DATA"
 csvfile <- paste0(dataFolder,"/OECD_",dataset, ".csv")
 if(!file.exists(csvfile)){
@@ -93,8 +96,7 @@ csv obtained 2017-11-21
 
 The OECD IRTAD_CASUAL_BY_AGE dataset is Casualties by age & road user, not as up to date or as many countries as the headline ITF_ROAD_ACCIDENTS data, but more detail where available. As this is a huge dataset from all of the detail, this query was specifically for deaths 2005+
 
-
-```r
+```{r}
 dataset <- "IRTAD_CASUAL_BY_AGE"
 csvfile <- paste0(dataFolder,"/OECD_",dataset, ".csv")
 if(!file.exists(csvfile)){
