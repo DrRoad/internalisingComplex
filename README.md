@@ -1,6 +1,11 @@
-# Traffic Safety Data
-David Hood  
-11/21/2017  
+---
+title: "Traffic Safety Data"
+author: "David Hood"
+date: "11/21/2017"
+output: 
+  word_document: 
+    keep_md: yes
+---
 
 
 
@@ -147,7 +152,7 @@ if(!file.exists(csvfile)){
 
 csv obtained 2017-11-21
 
-The New Zealand Ministry of Health publishes hospital discharge data for cases where someone has been admitted to public hospitals for a day or more at http://www.health.govt.nz/nz-health-statistics/health-statistics-and-data-sets/hospital-event-data-and-stats coded by cause. In the case of transport the external causes use the codes V00 to V99 depending on admitted persons mode of transport and accident cause. As the data is on different pages for each year, this script downloads and combines it into one dataset. For the two most recent years raw data is published as zip compressed text files.
+The New Zealand Ministry of Health publishes hospital discharge data for cases where someone has been admitted to public hospitals for a day or more at http://www.health.govt.nz/nz-health-statistics/health-statistics-and-data-sets/hospital-event-data-and-stats coded by cause. In the case of transport the external causes use the codes V00 to V99 depending on admitted persons mode of transport and accident cause. As the data is on different pages for each year, this script downloads and combines it into one dataset. For the two most recent years raw data is published as zip compressed text files. As it stands, the script discards the non-V series (traffic) data.
 
 
 ```r
