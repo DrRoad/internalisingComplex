@@ -17,13 +17,25 @@ This repository is for the R code for obtaining various public sources of data a
 
 For the benefit of non-R users, I am making a .csv copy of the obtained data in the traffic_data folder.
 
+### R packages used
+
+```{r, messages=FALSE, warning=FALSE}
+library(OECD)
+library(dplyr)
+```
+
+and a few configuration things
+
+```{r}
+dataFolder= "traffic_data"
+```
+
+
 ## OECD data
 
 OECD data is obtained using the OECD package in R, and by doing a get_datasets() command, you can then look through for the IDs or relevvant data sets
 
 ```{r}
-dataFolder= "traffic_data"
-library(OECD)
 dataset_list <- get_datasets()
 # search_dataset("accidents", data = dataset_list)
 ```
@@ -111,6 +123,37 @@ if(!file.exists(csvfile)){
   write.csv(df4, file=csvfile, row.names = FALSE)
 }
 ```
+
+## New Zealand Ministry of Health
+
+### Hospital Discharge records
+
+csv obtained 2017-11-21
+
+The New Zealand Ministry of Health publishes hospital discharge data for cases where someone has been admitted to public hospitals for a day or more at http://www.health.govt.nz/nz-health-statistics/health-statistics-and-data-sets/hospital-event-data-and-stats coded by cause. In the case of transport the external causes use the codes V00 to V99 depending on admitted persons mode of transport and accident cause. As the data is on different pages for each year, this script downloads and combines it into one dataset. For the two most recent years raw data is published as zip compressed text files.
+
+```{r}
+dataset <- "Hospital_Discharges"
+csvfile <- paste0(dataFolder,"/NZ_MoH_",dataset, ".csv")
+if(!file.exists(csvfile)){
+y1415zip <- "http://www.health.govt.nz/system/files/documents/publications/publicly-funded-discharges-2014-15-data.zip"
+y1314zip <- "http://www.health.govt.nz/system/files/documents/publications/publicly-funded-discharges-2013-14-data.zip"
+temp <- tempfile()
+download.file(y1415zip,temp)
+y1415data <- read.csv(unz(temp, "PubFund_DischargesInjury.txt"), sep="|", stringsAsFactors = FALSE)
+unlink(temp)
+temp <- tempfile()
+download.file(y1314zip,temp)
+y1314data <- read.csv(unz(temp, "PubFund_Data/PubFund_DischargesInjury.txt"), sep="|", stringsAsFactors = FALSE)
+unlink(temp)
+names(y1314data) <- names(y1415data)
+discharges <- bind_rows(y1314data, y1415data)
+traffic_discharges <- discharges[grep("V", discharges$ICDCode),]
+write.csv(traffic_discharges, file=csvfile, row.names = FALSE)
+}
+```
+
+I think there is a lot of interesting stuff in there
 
 
 
