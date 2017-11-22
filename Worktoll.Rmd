@@ -1,0 +1,53 @@
+---
+title: "WorkLifeRoad"
+author: "David Hood"
+date: "11/22/2017"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Making a Working Hours vs. Road Toll graph
+
+```{r libs, warning=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+```
+
+Assuming the datasets have been created as in the README.Rmd in this folder, this is the code for graphing average hours worked in a year and the road toll per capita.
+
+```{r dataload}
+toll <- read.csv("traffic_data/OECD_ITF_ROAD_ACCIDENTS.csv", stringsAsFactors = FALSE)
+work <- read.csv("traffic_data/OECD_ANHRS.csv", stringsAsFactors = FALSE)
+pop <- read.csv("traffic_data/OECD_ALFS_POP_LABOUR.csv", stringsAsFactors = FALSE)
+```
+
+A little data cleanup making it specific to this question
+
+```{r}
+## road fatalities, as injuries may have reporting issues
+deaths <- toll %>% filter(VARIABLE == "T-ACCI-KIL") %>% rename(toll = obsValue) %>%
+select(COUNTRY, obsTime, toll)
+
+## total employment rather than dependent
+employ <- work %>% filter(EMPSTAT == "TE") %>% rename(hours_worked = obsValue) %>%
+select(COUNTRY, obsTime, hours_worked)
+
+## total population
+people <- pop %>% filter(SEX=="TT") %>% rename(population = obsValue) %>%
+select(COUNTRY = LOCATION, obsTime, population)
+```
+
+Join the data and make the graph
+
+```{r}
+deaths %>% inner_join(people) %>% inner_join(employ) %>%
+  mutate(toll_per_cap_1000 = toll/ population) %>%
+  filter(COUNTRY %in% c("CAN", "AUS", "USA", "GBR","NZL", "SWE")) %>%
+  ggplot(aes(x=hours_worked, y=toll_per_cap_1000, col=COUNTRY)) +
+  geom_point() + geom_smooth(method="lm") + xlab("Average Annual Hours Worked by Worker") +
+  ylab("Road Fatalities per Capita (1000)") + facet_wrap(~ COUNTRY, ncol=2)
+```
+

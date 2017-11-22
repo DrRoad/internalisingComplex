@@ -124,6 +124,52 @@ if(!file.exists(csvfile)){
 }
 ```
 
+### ALFS_POP_LABOUR
+
+csv obtained 2017-11-23
+
+OECD Population and Labour Force data 
+
+
+```{r}
+
+dataset <- "ALFS_POP_LABOUR"
+csvfile <- paste0(dataFolder,"/OECD_",dataset, ".csv")
+if(!file.exists(csvfile)){
+  dstruc <- get_data_structure(dataset)
+  df <- get_dataset(dataset)
+  df2 <- merge(df, dstruc$UNIT, by.x="UNIT", by.y="id")
+  names(df2)[12] <- "UNIT_label"
+  df3 <- merge(df2, dstruc$SUBJECT, by.x="SUBJECT", by.y="id")
+  names(df3)[13] <- "SUBJECT_label"
+  df4 <- merge(df3[df3$SUBJECT_label == "Population",], dstruc$POWERCODE, by.x="POWERCODE", by.y="id")
+  names(df4)[14] <- "POWERCODE_label"
+  write.csv(df4, file=csvfile, row.names = FALSE)
+}
+```
+
+
+### ANHRS
+
+csv obtained 2017-11-23
+
+OECD Average annual hours actually worked per worker
+
+```{r}
+
+dataset <- "ANHRS"
+csvfile <- paste0(dataFolder,"/OECD_",dataset, ".csv")
+if(!file.exists(csvfile)){
+  dstruc <- get_data_structure(dataset)
+  df <- get_dataset(dataset)
+  df2 <- merge(df, dstruc$EMPSTAT, by.x="EMPSTAT", by.y="id")
+  names(df2)[7] <- "EMPSTAT_label"
+  write.csv(df2, file=csvfile, row.names = FALSE)
+}
+```
+
+
+
 ## New Zealand Ministry of Health
 
 ### Hospital Discharge records
