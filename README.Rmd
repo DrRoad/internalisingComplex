@@ -168,6 +168,24 @@ if(!file.exists(csvfile)){
 }
 ```
 
+### IDD (GINI)
+
+csv obtained 2017-11-23
+
+The GINI measure from OECD Income Distribution and Poverty. Note that the METHOD of calculating income was changed in 2011 so there are two entries for 2012 giving a cross over value.
+
+```{r}
+# http://stats.oecd.org/restsdmx/sdmx.ashx/GetData/IDD/AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LVA+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA+BRA+CHN+CRI+IND+LTU+RUS+ZAF.GINI.TOT+WA+OLD.CURRENT.METH2012+METH2011/all?startTime=2003&endTime=2016
+dataset <- "IDD"
+csvfile <- paste0(dataFolder,"/OECD_",dataset, ".csv")
+if(!file.exists(csvfile)){
+  dstruc <- get_data_structure(dataset)
+  df <- get_dataset(dataset, filter="AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LVA+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA+BRA+CHN+CRI+IND+LTU+RUS+ZAF.GINI.TOT+WA+OLD.CURRENT.METH2012+METH2011", start_time = 1986, end_time = 2016, pre_formatted = TRUE)
+  df2 <- merge(df, dstruc$AGE, by.x="AGE", by.y="id")
+  names(df2)[12] <- "AGE_label"
+  write.csv(df2, file=csvfile, row.names = FALSE)
+}
+```
 
 
 ## New Zealand Ministry of Health

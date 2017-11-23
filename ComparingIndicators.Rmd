@@ -1,0 +1,93 @@
+---
+title: "WorkLifeRoad"
+author: "David Hood"
+date: "11/22/2017"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Checking comparative factors
+
+```{r libs, warning=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(purrr)
+```
+
+Assuming the datasets have been created as in the README.Rmd in this folder, read in a bunch of data.
+
+```{r dataload}
+toll <- read.csv("traffic_data/OECD_ITF_ROAD_ACCIDENTS.csv", stringsAsFactors = FALSE)
+work <- read.csv("traffic_data/OECD_ANHRS.csv", stringsAsFactors = FALSE)
+pop <- read.csv("traffic_data/OECD_ALFS_POP_LABOUR.csv", stringsAsFactors = FALSE)
+kms <- read.csv("traffic_data/OECD_ITF_PASSENGER_TRANSPORT.csv", stringsAsFactors = FALSE)
+gini <- read.csv("traffic_data/OECD_IDD.csv", stringsAsFactors = FALSE)
+```
+
+A little data cleanup making it specific to this question
+
+```{r}
+## road fatalities, as injuries may have reporting issues
+deaths <- toll %>% filter(VARIABLE == "T-ACCI-KIL") %>% rename(toll = obsValue) %>%
+select(COUNTRY, obsTime, toll)
+
+## total employment rather than dependent
+employ <- work %>% filter(EMPSTAT == "TE") %>% rename(hours_worked = obsValue) %>%
+select(COUNTRY, obsTime, hours_worked)
+
+## total population
+people <- pop %>% filter(SEX=="TT") %>% rename(population = obsValue) %>%
+select(COUNTRY = LOCATION, obsTime, population)
+
+## "Road passenger transport by passenger cars"
+usage <- kms %>% filter(VARIABLE=="T-PASS-RD-CAR") %>% rename(kms_travelled = obsValue) %>%
+select(COUNTRY, obsTime, kms_travelled)
+
+## gini calculated by method until 2011
+inequal <- gini %>%  filter(METHODO=="METH2011") %>% rename(gini_value = obsValue) %>%
+select(COUNTRY = LOCATION, obsTime, gini_value)
+
+```
+
+Join the data and make the graph
+
+```{r fig.height=6, fig.width=6}
+combo <- deaths %>% inner_join(people) %>% inner_join(employ) %>%
+  inner_join(usage) %>%
+  mutate(toll_per_cap_1000 = toll/ population,
+         kms_per_cap_1000 = kms_travelled / population) 
+
+combo %>% group_by(COUNTRY) %>% 
+  summarise(workcor = cor(toll_per_cap_1000, hours_worked),
+            roadcor = cor(toll_per_cap_1000, kms_per_cap_1000),
+            roadwork = cor(hours_worked, kms_per_cap_1000)) %>%
+  ggplot(aes(x=workcor, y=roadcor)) + geom_point() + xlim(-1,1) +
+  ylim(-1,1) + xlab("Road Toll per capita and Av. work hours correlation") +
+  ylab("Road Toll per capita and Car Kilometers driven per capita") +
+  ggtitle("26 countries for which OECD data available")
+
+  
+
+```
+
+```{r}
+combo <- deaths %>% inner_join(people) %>% inner_join(employ) %>%
+  inner_join(inequal) %>%
+  mutate(toll_per_cap_1000 = toll/ population) 
+
+combo %>% group_by(COUNTRY) %>% 
+  summarise(workcor = cor(toll_per_cap_1000, hours_worked),
+            roadcor = cor(toll_per_cap_1000, gini_value),
+            roadwork = cor(hours_worked, gini_value)) %>% glimpse() %>%
+  ggplot(aes(x=workcor, y=roadcor)) + geom_point() + xlim(-1,1) +
+  ylim(-1,1) + xlab("Road Toll per capita and Av. work hours correlation") +
+  ylab("Road Toll & GINI") +
+  ggtitle("33 countries for which OECD data available")
+
+```
+

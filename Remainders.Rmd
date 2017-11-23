@@ -1,0 +1,60 @@
+---
+title: "Country Fit data"
+author: "David Hood"
+date: "11/22/2017"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 20 year graph fit
+
+```{r libs, warning=FALSE, message=FALSE}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+Assuming the datasets have been created as in the README.Rmd in this folder, this is the code for checking indivdual country average hours worked in a year and the road toll per capita.
+
+```{r dataload}
+toll <- read.csv("traffic_data/OECD_ITF_ROAD_ACCIDENTS.csv", stringsAsFactors = FALSE)
+work <- read.csv("traffic_data/OECD_ANHRS.csv", stringsAsFactors = FALSE)
+pop <- read.csv("traffic_data/OECD_ALFS_POP_LABOUR.csv", stringsAsFactors = FALSE)
+```
+
+A little data cleanup making it specific to this question
+
+```{r}
+## road fatalities, as injuries may have reporting issues
+deaths <- toll %>% filter(VARIABLE == "T-ACCI-KIL") %>% rename(toll = obsValue) %>%
+select(COUNTRY, obsTime, toll)
+
+## total employment rather than dependent
+employ <- work %>% filter(EMPSTAT == "TE") %>% rename(hours_worked = obsValue) %>%
+select(COUNTRY, obsTime, hours_worked)
+
+## total population
+people <- pop %>% filter(SEX=="TT") %>% rename(population = obsValue) %>%
+select(COUNTRY = LOCATION, obsTime, population)
+```
+
+Join the data
+
+```{r message=FALSE, warning=FALSE, fig.height = 10, fig.width=6}
+combo <- deaths %>% inner_join(people) %>% inner_join(employ) %>%
+  mutate(toll_per_cap_1000 = toll/ population) %>% filter(obsTime > 1996) %>%
+  arrange(COUNTRY, obsTime) %>% group_by(COUNTRY) %>% mutate(baseline_deaths = toll_per_cap_1000 - toll_per_cap_1000[1]) %>% ungroup()
+
+combo %>% group_by(COUNTRY) %>% 
+  mutate(predicted = predict(lm(baseline_deaths ~ hours_worked))) %>% ungroup() %>%
+  gather(key= series, value= fatalities_from_year1, baseline_deaths, predicted) %>%
+  ggplot(aes(x=obsTime, y=fatalities_from_year1, colour=series)) + geom_line() +
+  facet_wrap(~ COUNTRY, ncol=3)
+  
+```
+
