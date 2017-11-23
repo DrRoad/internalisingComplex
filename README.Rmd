@@ -187,6 +187,21 @@ if(!file.exists(csvfile)){
 }
 ```
 
+### SNA_TABLE1
+not yet obtained, want to be more specific about the data
+OECD GDP
+```{r}
+
+dataset <- "SNA_TABLE1"
+csvfile <- paste0(dataFolder,"/OECD_",dataset, ".csv")
+if(!file.exists(csvfile)){
+  dstruc <- get_data_structure(dataset)
+  df <- get_dataset(dataset)
+
+}
+```
+
+
 
 ## New Zealand Ministry of Health
 
